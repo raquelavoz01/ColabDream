@@ -1,0 +1,122 @@
+from zipfile import ZipFile
+from pathlib import Path
+
+# Estrutura do index.html com a imagem da maçã fluindo incluída
+html_content = """<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ColabDream</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #faf7ff;
+      color: #333;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background-color: #6a1b9a;
+      color: white;
+      padding: 2rem 1rem;
+    }
+
+    .painel-maca img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 2rem auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    section {
+      padding: 2rem;
+      max-width: 800px;
+      margin: auto;
+      text-align: left;
+    }
+
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    .botao {
+      display: inline-block;
+      background-color: #7e57c2;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      margin-top: 1rem;
+    }
+
+    .botao:hover {
+      background-color: #5e35b1;
+    }
+
+    details {
+      margin-top: 1.5rem;
+      background: #f5ebff;
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    summary {
+      font-weight: bold;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>ColabDream</h1>
+  <p>Inteligência Artificial colaborativa, sensível e criativa</p>
+</header>
+
+<div class="painel-maca">
+  <img src="maca-fluindo.png" alt="Maçã se abrindo e fluindo ideias, vídeos e imagens" />
+</div>
+
+<section>
+  <h2>✨ Sobre o Projeto</h2>
+  <p>ColabDream é uma proposta de IA multimodal que entende contextos profundos, gera conteúdos com senso real para colaboração criativa.</p>
+
+  <h2>🧡 Como contribuir</h2>
+  <p>Este projeto está aberto para colaboração! Se você se interessa por IA, arte, escrita, programação ou ideias novas — participe!</p>
+
+  <a href="#" class="botao">visite o repositório</a>
+
+  <details>
+    <summary>📜 Manifesto</summary>
+    <p>Queremos uma IA que inspire, colabore e se emocione junto com você. Um espaço onde a tecnologia serve à criação e ao cuidado.</p>
+  </details>
+
+  <details>
+    <summary>🔭 Visão</summary>
+    <p>Construir um ecossistema de IA aberta, sensível e transformadora, voltada à criação coletiva.</p>
+  </details>
+</section>
+
+</body>
+</html>
+"""
+
+# Criar os arquivos temporários
+output_dir = Path("/mnt/data/colabdream-site")
+output_dir.mkdir(parents=True, exist_ok=True)
+
+# Salvar o index.html
+index_path = output_dir / "index.html"
+index_path.write_text(html_content, encoding="utf-8")
+
+# Criar arquivo ZIP
+zip_path = Path("/mnt/data/colabdream-site.zip")
+with ZipFile(zip_path, "w") as zipf:
+    zipf.write(index_path, arcname="index.html")
+
+zip_path.name  # Retornar apenas o nome do arquivo zip criado
