@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Escritor de Histórias IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div id="root"></div>
+
+
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "@google/genai": "https://esm.sh/@google/genai",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+  <script type="module" src="index.tsx"></script>
+</body>
+</html>
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import { GoogleGenAI } from '@google/genai';
+
+
+const App = () => {
+  const [theme, setTheme] = useState('');
+  const [character, setCharacter] = useState('');
+  const [length, setLength] = useState('curta');
+  const [audience, setAudience] = useState('crianças');
+
+
+  const [story, setStory] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!theme || !character) {
+      setError('Por favor, preencha o tema e o nome do personagem.');
+      return;
+    }
+
+
+    setIsLoading(true);
+    setError(null);
+    setStory('');
+
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+
+      const prompt = `Escreva uma história ${length} para o público de ${audience}. A história deve ser sobre "${theme}" e o personagem principal se chama ${character}.`;
+
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: prompt,
+      });
+
+
+      setStory(response.text);
+
+
+    } catch (err) {
+      console.error(err);
+      setError('Ocorreu um erro ao gerar a história. Por favor, tente novamente mais tarde.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  return (
+    <div className="app-container">
+      <header>
+        <h1>Escritor de Histórias IA</h1>
+        <p>Dê vida às suas ideias. Descreva sua história e deixe a IA escrever.</p>
+      </header>
+
+
+      <form className="story-form" onSubmit={handleSubmit}>
+        <div className="form-grid">
+          <div className="form-group">
+            <label htmlFor="theme">Tema da História</label>
+            <input
+              id="theme"
+              type="text"
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              placeholder="Ex: Uma aventura espacial"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="character">Nome do Personagem</label>
+            <input
+              id="character"
+              type="text"
+              value={character}
+              onChange={(e) => setCharacter(e.target.value)}
+              placeholder="Ex: Capitão Astrix"
+              required
+            />
+          </div>
+          <div className="form-group">
+            <label htmlFor="length">Tamanho da História</label>
+            <select id="length" value={length} onChange={(e) => setLength(e.target.value)}>
+              <option value="curta">Curta</option>
+              <option value="média">Média</option>
+              <option value="longa">Longa</option>
+            </select>
+          </div>
+          <div className="form-group">
+            <label htmlFor="audience">Público Alvo</label>
+            <select id="audience" value={audience} onChange={(e) => setAudience(e.target.value)}>
+              <option value="crianças">Crianças</option>
+              <option value="jovens adultos">Jovens Adultos</option>
+              <option value="adultos">Adultos</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" className="submit-btn" disabled={isLoading}>
+          {isLoading ? 'Gerando...' : 'Gerar História'}
+        </button>
+      </form>
+
+
+      <div className="result-area">
+        {isLoading && <div className="loader"></div>}
+        {error && <p className="error-message">{error}</p>}
+        {story && <div className="story-container">{story}</div>}
+      </div>
+    </div>
+  );
+};
+
+
+const container = document.getElementById('root');
+const root = createRoot(container!);
+root.render(<App />);
+
+
+:root {
+  --background-dark: #121212;
+  --surface-color: #1e1e1e;
+  --primary-accent: #8e44ad;
+  --primary-accent-hover: #9b59b6;
+  --text-primary: #E0E0E0;
+  --text-secondary: #a0a0a0;
+  --border-color: #333;
+  --font-family: 'Inter', sans-serif;
+  --border-radius: 8px;
+}
+
+
+* {
+  box-sizing: border-box;
+}
+
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-dark);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+
+
+#root {
+  width: 100%;
+  max-width: 800px;
+}
+
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+
+header {
+  text-align: center;
+}
+
+
+header h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+
+header p {
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+
+.story-form {
+  background-color: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+
+@media (min-width: 600px) {
+  .form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+
+.form-group label {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--background-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: var(--font-family);
+}
+
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.5);
+}
+
+
+.submit-btn {
+  background-color: var(--primary-accent);
+  color: #fff;
+  border: none;
+  padding: 1rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+
+.submit-btn:hover:not(:disabled) {
+  background-color: var(--primary-accent-hover);
+}
+
+
+.submit-btn:disabled {
+  background-color: #555;
+  cursor: not-allowed;
+}
+
+
+.result-area {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.loader {
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-accent);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+.error-message {
+  color: #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+  border: 1px solid #e74c3c;
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
+
+.story-container {
+  background-color: var(--surface-color);
+  padding: 2rem;
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+  white-space: pre-wrap;
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+
+
+{
+  "name": "Escritor de HistoriasIA",
+  "description": "Um aplicativo que utiliza IA para gerar histórias criativas com base nas ideias do usuário."
+}
+
+
